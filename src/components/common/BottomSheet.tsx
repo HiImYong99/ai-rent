@@ -63,7 +63,7 @@ const BottomSheet: React.FC<BottomSheetProps> = ({ isOpen, onClose, title, child
           </h3>
         )}
         
-        <div className="max-h-[70vh] overflow-y-auto">
+        <div className="max-h-[70vh] overflow-y-auto overflow-x-hidden">
           {children}
         </div>
       </div>
