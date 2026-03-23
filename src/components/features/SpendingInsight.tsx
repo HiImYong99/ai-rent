@@ -1,6 +1,7 @@
 import React, { useMemo, useState, useCallback } from 'react';
 import { Play, Lock } from 'lucide-react';
 import { AD_IDS } from '../../config/adConfig';
+import { loadFullScreenAd, showFullScreenAd } from '@apps-in-toss/web-framework';
 
 import coffeeImg from '../../assets/comparisons/coffee.png';
 import pizzaImg from '../../assets/comparisons/pizza.png';
@@ -46,12 +47,9 @@ const COMPARISONS: Comparison[] = [
   { image: phoneImg, label: '5G 요금제', calc: (a) => `${(a / 69000).toFixed(1)}개월` },
 ];
 
-const REWARD_AD_DURATION = 5;
-
 const SpendingInsight: React.FC<SpendingInsightProps> = ({ monthlyKRW }) => {
   const [unlocked, setUnlocked] = useState(false);
-  const [adState, setAdState] = useState<'idle' | 'watching' | 'done'>('idle');
-  const [adCountdown, setAdCountdown] = useState(REWARD_AD_DURATION);
+  const [adState, setAdState] = useState<'idle' | 'loading' | 'done'>('idle');
 
   const tier = useMemo(() => {
     let current = TIERS[0];
@@ -70,18 +68,31 @@ const SpendingInsight: React.FC<SpendingInsightProps> = ({ monthlyKRW }) => {
   }, [monthlyKRW]);
 
   const startRewardAd = useCallback(() => {
-    setAdState('watching');
-    setAdCountdown(REWARD_AD_DURATION);
-    let remaining = REWARD_AD_DURATION;
-    const timer = setInterval(() => {
-      remaining -= 1;
-      setAdCountdown(remaining);
-      if (remaining <= 0) {
-        clearInterval(timer);
-        setAdState('done');
-        setUnlocked(true);
-      }
-    }, 1000);
+    if (!loadFullScreenAd.isSupported()) {
+      setUnlocked(true);
+      return;
+    }
+    setAdState('loading');
+    loadFullScreenAd({
+      options: { adGroupId: AD_IDS.REWARD_INSIGHT },
+      onEvent: (event) => {
+        if (event.type === 'loaded') {
+          showFullScreenAd({
+            options: { adGroupId: AD_IDS.REWARD_INSIGHT },
+            onEvent: (showEvent) => {
+              if (showEvent.type === 'userEarnedReward') {
+                setUnlocked(true);
+                setAdState('done');
+              } else if (showEvent.type === 'dismissed') {
+                setAdState('idle');
+              }
+            },
+            onError: () => setAdState('idle'),
+          });
+        }
+      },
+      onError: () => setAdState('idle'),
+    });
   }, []);
 
   if (monthlyKRW <= 0) return null;
@@ -106,40 +117,17 @@ const SpendingInsight: React.FC<SpendingInsightProps> = ({ monthlyKRW }) => {
           <Play className="w-4 h-4" fill="white" />
           영상 보고 확인하기
         </button>
-        <p className="text-[10px] text-toss-gray-300 mt-3">리워드 광고 · 약 {REWARD_AD_DURATION}초</p>
+        <p className="text-[10px] text-toss-gray-300 mt-3">리워드 광고</p>
       </div>
     );
   }
 
-  // ── Watching ad ──
-  if (adState === 'watching') {
+  // ── Loading ad ──
+  if (adState === 'loading') {
     return (
-      <div className="toss-card flex flex-col items-center py-6">
-        {/* 토스 SDK: tossAd.showRewarded(AD_IDS.REWARD_INSIGHT) */}
-        <div
-          className="w-full aspect-video bg-gradient-to-br from-toss-gray-800 to-toss-gray-700 rounded-xl flex flex-col items-center justify-center mb-5"
-          data-ad-id={AD_IDS.REWARD_INSIGHT}
-        >
-          <span className="text-white/30 text-2xl font-medium">AD</span>
-          <span className="text-white/20 text-[10px] mt-1">토스 리워드 광고 영역</span>
-        </div>
-        <div className="flex items-center gap-3">
-          <div className="relative w-10 h-10">
-            <svg className="w-10 h-10 -rotate-90" viewBox="0 0 40 40">
-              <circle cx="20" cy="20" r="17" fill="none" stroke="#E5E8EB" strokeWidth="3" />
-              <circle
-                cx="20" cy="20" r="17" fill="none" stroke="#3182F6" strokeWidth="3"
-                strokeDasharray={`${(1 - adCountdown / REWARD_AD_DURATION) * 106.8} 106.8`}
-                strokeLinecap="round"
-                className="transition-all duration-1000 ease-linear"
-              />
-            </svg>
-            <span className="absolute inset-0 flex items-center justify-center text-sm font-bold text-toss-gray-700">
-              {adCountdown}
-            </span>
-          </div>
-          <p className="text-sm text-toss-gray-500">{adCountdown}초 후에 결과가 공개돼요</p>
-        </div>
+      <div className="toss-card flex flex-col items-center py-8 gap-3">
+        <div className="w-8 h-8 border-2 border-toss-blue border-t-transparent rounded-full animate-spin" />
+        <p className="text-sm text-toss-gray-400">광고 불러오는 중...</p>
       </div>
     );
   }
