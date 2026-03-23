@@ -1,12 +1,12 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import AppLayout from './components/layout/AppLayout';
-import Header from './components/layout/Header';
 import DashboardCard from './components/features/DashboardCard';
 import SubscriptionList from './components/features/SubscriptionList';
 import BottomSheet from './components/common/BottomSheet';
 import AddSubForm from './components/features/AddSubForm';
 import SpendingInsight from './components/features/SpendingInsight';
 import TossBannerAd from './components/features/AdBanner';
+import InterstitialAd from './components/features/InterstitialAd';
 import { Plus } from 'lucide-react';
 import { useAppStore } from './store/useAppStore';
 import { convertToKRW } from './utils/currency';
@@ -16,6 +16,8 @@ import type { PresetService } from './data/presets';
 function App() {
   const [isAddSheetOpen, setIsAddSheetOpen] = useState(false);
   const [quickAddService, setQuickAddService] = useState<PresetService | null>(null);
+  const [showInterstitial, setShowInterstitial] = useState(false);
+  const [pendingRegistration, setPendingRegistration] = useState<(() => void) | null>(null);
   const { subscriptions, exchangeRate } = useAppStore();
 
   const totalMonthlyKRW = subscriptions.reduce((acc, sub) => {
@@ -34,11 +36,23 @@ function App() {
     setQuickAddService(null);
   };
 
+  const handleShowInterstitial = useCallback((registerFn: () => void) => {
+    setPendingRegistration(() => registerFn);
+    setShowInterstitial(true);
+  }, []);
+
+  const handleAdComplete = useCallback(() => {
+    setShowInterstitial(false);
+    if (pendingRegistration) {
+      pendingRegistration();
+      setPendingRegistration(null);
+    }
+    handleCloseAdd();
+  }, [pendingRegistration]);
+
   return (
     <div className="bg-toss-gray-100 min-h-screen">
       <AppLayout>
-        <Header title="AI 월세" />
-
         <div className="mt-4 pb-24 flex flex-col gap-5">
           {/* 1. Dashboard - 월간 총액 */}
           <section>
@@ -86,9 +100,17 @@ function App() {
             onSuccess={handleCloseAdd}
             onCancel={handleCloseAdd}
             initialService={quickAddService}
+            onShowInterstitial={handleShowInterstitial}
           />
         </BottomSheet>
       </AppLayout>
+
+      {/* 전면 광고 - BottomSheet 밖에서 렌더링 (full-screen 보장) */}
+      <InterstitialAd
+        adId={AD_IDS.INTERSTITIAL_REGISTER}
+        isOpen={showInterstitial}
+        onComplete={handleAdComplete}
+      />
     </div>
   );
 }

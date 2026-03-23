@@ -17,7 +17,15 @@ const BottomSheet: React.FC<BottomSheetProps> = ({ isOpen, onClose, title, child
   const [shouldRender, setShouldRender] = useState(isOpen);
 
   useEffect(() => {
-    if (isOpen) setShouldRender(true);
+    if (isOpen) {
+      setShouldRender(true);
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
   }, [isOpen]);
 
   const handleAnimationEnd = () => {
