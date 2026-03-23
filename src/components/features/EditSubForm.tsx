@@ -53,13 +53,13 @@ const EditSubForm: React.FC<EditSubFormProps> = ({ subscription, onSuccess, onCa
             type="number"
             value={price}
             onChange={(e) => setPrice(e.target.value)}
-            className="flex-1 h-14 px-4 bg-toss-gray-50 rounded-toss text-lg outline-none border-2 border-transparent focus:border-toss-blue/30 focus:bg-white transition-all"
+            className="min-w-0 flex-1 h-14 px-4 bg-toss-gray-50 rounded-toss text-lg outline-none border-2 border-transparent focus:border-toss-blue/30 focus:bg-white transition-all"
           />
           <div className="flex bg-toss-gray-100 rounded-toss p-1 shrink-0">
             <button
               type="button"
               className={clsx(
-                'px-4 h-full rounded-[12px] text-sm font-bold transition-all',
+                'px-3 h-full rounded-[12px] text-sm font-bold transition-all',
                 currency === 'USD' ? 'bg-white text-toss-blue shadow-sm' : 'text-toss-gray-500'
               )}
               onClick={() => setCurrency('USD')}
@@ -69,7 +69,7 @@ const EditSubForm: React.FC<EditSubFormProps> = ({ subscription, onSuccess, onCa
             <button
               type="button"
               className={clsx(
-                'px-4 h-full rounded-[12px] text-sm font-bold transition-all',
+                'px-3 h-full rounded-[12px] text-sm font-bold transition-all',
                 currency === 'KRW' ? 'bg-white text-toss-blue shadow-sm' : 'text-toss-gray-500'
               )}
               onClick={() => setCurrency('KRW')}
