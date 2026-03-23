@@ -1,0 +1,9 @@
+{
+  "appName": "ai-rent",
+  "displayName": {
+    "ko": "AI 월세",
+    "en": "AI Rent"
+  },
+  "ageLimit": "만 19세 이상",
+  "homePage": ""
+}
