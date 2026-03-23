@@ -10,6 +10,7 @@ import { POPULAR_SERVICES, type PresetService } from '../../data/presets';
 
 interface SubscriptionListProps {
   onQuickAdd?: (service: PresetService) => void;
+  onAddNew?: () => void;
 }
 
 // Logo component: shows real logo if available, fallback to colored circle
@@ -145,48 +146,90 @@ const SwipeableCard: React.FC<{
   );
 };
 
-const SubscriptionList: React.FC<SubscriptionListProps> = ({ onQuickAdd }) => {
+const LOGO_POSITIONS = [
+  { top: '8%',  left: '4%',  size: 44, delay: '0ms' },
+  { top: '0%',  left: '38%', size: 52, delay: '60ms' },
+  { top: '5%',  left: '72%', size: 40, delay: '120ms' },
+  { top: '48%', left: '82%', size: 46, delay: '180ms' },
+  { top: '72%', left: '62%', size: 38, delay: '240ms' },
+  { top: '78%', left: '22%', size: 48, delay: '300ms' },
+  { top: '44%', left: '2%',  size: 42, delay: '360ms' },
+];
+
+const SubscriptionList: React.FC<SubscriptionListProps> = ({ onAddNew }) => {
   const { subscriptions, removeSubscription } = useAppStore();
   const [editingSub, setEditingSub] = useState<Subscription | null>(null);
   const [detailSub, setDetailSub] = useState<Subscription | null>(null);
 
-  // Empty state
+  // Landing page
   if (subscriptions.length === 0) {
+    const displayServices = POPULAR_SERVICES.slice(0, 7);
     return (
-      <div className="flex flex-col items-center pt-16 pb-8 px-2">
-        <div className="w-16 h-16 bg-toss-gray-100 rounded-full flex items-center justify-center mb-6">
-          <span className="text-3xl">🤖</span>
-        </div>
-        <h3 className="text-xl font-bold text-toss-gray-900 mb-2">
-          아직 등록한 구독이 없어요
-        </h3>
-        <p className="text-sm text-toss-gray-500 mb-8 text-center">
-          쓰고 있는 AI 서비스를 탭해서 바로 등록해보세요
-        </p>
+      <div className="flex flex-col px-1 pt-2 pb-10">
+        {/* Hero - dark card with floating logos */}
+        <div
+          className="relative w-full rounded-[28px] overflow-hidden mb-7"
+          style={{ height: 280, background: 'linear-gradient(145deg, #0f1923 0%, #1a2a3a 60%, #0d2137 100%)' }}
+        >
+          {/* Subtle grid pattern */}
+          <div
+            className="absolute inset-0 opacity-[0.06]"
+            style={{
+              backgroundImage: 'linear-gradient(#fff 1px, transparent 1px), linear-gradient(90deg, #fff 1px, transparent 1px)',
+              backgroundSize: '32px 32px',
+            }}
+          />
 
-        <div className="w-full grid grid-cols-2 gap-3">
-          {POPULAR_SERVICES.map((service) => (
-            <button
-              key={service.id}
-              type="button"
-              onClick={() => onQuickAdd?.(service)}
-              className="flex items-center gap-3 p-4 bg-white rounded-toss border border-toss-gray-100 active:scale-[0.97] transition-all text-left shadow-sm"
-            >
-              <div className="w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 p-1.5 bg-white border border-toss-gray-100">
+          {/* Floating service logos */}
+          {displayServices.map((service, i) => {
+            const pos = LOGO_POSITIONS[i];
+            const s = pos.size;
+            return (
+              <div
+                key={service.id}
+                className="absolute bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl flex items-center justify-center p-2"
+                style={{ top: pos.top, left: pos.left, width: s, height: s }}
+              >
                 <img src={service.logo} alt={service.name} className="w-full h-full object-contain rounded-lg" />
               </div>
-              <div className="flex flex-col min-w-0">
-                <span className="text-[14px] font-bold text-toss-gray-800 truncate">
-                  {service.name}
-                </span>
-                <span className="text-xs text-toss-gray-400">
-                  {service.plans.length}개 요금제
-                </span>
-              </div>
-            </button>
-          ))}
+            );
+          })}
+
+          {/* Center mock teaser */}
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-1">
+            <p className="text-white/50 text-xs font-medium tracking-widest uppercase">이번 달 AI 구독료</p>
+            <p className="text-white font-extrabold text-[38px] tracking-tight" style={{ filter: 'blur(7px)', userSelect: 'none' }}>
+              ₩89,000
+            </p>
+            <div className="flex items-center gap-1.5 mt-1">
+              <div className="w-1.5 h-1.5 rounded-full bg-toss-blue" />
+              <p className="text-white/40 text-xs">등록 후 확인할 수 있어요</p>
+            </div>
+          </div>
         </div>
 
+        {/* Copy */}
+        <div className="px-1 mb-8">
+          <h2 className="text-[26px] font-extrabold text-toss-gray-900 leading-tight mb-2.5">
+            AI 구독료,<br/>한눈에 파악해요
+          </h2>
+          <p className="text-[15px] text-toss-gray-400 leading-relaxed">
+            ChatGPT, Claude, Cursor…<br/>
+            여기저기 흩어진 구독을 모아서<br/>
+            매달 얼마 나가는지 바로 알 수 있어요.
+          </p>
+        </div>
+
+        {/* CTA */}
+        <button
+          type="button"
+          onClick={onAddNew}
+          className="w-full h-[56px] rounded-2xl bg-toss-blue text-white font-bold text-[16px] shadow-lg active:scale-[0.97] transition-all"
+          style={{ boxShadow: '0 8px 24px rgba(49,130,246,0.35)' }}
+        >
+          첫 구독 등록하기
+        </button>
+        <p className="text-center text-xs text-toss-gray-300 mt-3">무료 · 데이터는 내 기기에만 저장돼요</p>
       </div>
     );
   }
