@@ -1,16 +1,15 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useAppStore } from '../../store/useAppStore';
 import type { PresetService, ServicePlan } from '../../data/presets';
 import { searchServices } from '../../data/presets';
 import { Search, ChevronLeft, Check, Sparkles } from 'lucide-react';
 import { clsx } from 'clsx';
-import InterstitialAd from './InterstitialAd';
-import { AD_IDS } from '../../config/adConfig';
 
 interface AddSubFormProps {
   onSuccess: () => void;
   onCancel: () => void;
   initialService?: PresetService | null;
+  onShowInterstitial?: (registerFn: () => void) => void;
 }
 
 type Step = 'service' | 'plan' | 'confirm';
@@ -30,7 +29,7 @@ const ServiceLogo: React.FC<{ service: PresetService; size?: string }> = ({
   </div>
 );
 
-const AddSubForm: React.FC<AddSubFormProps> = ({ onSuccess, onCancel, initialService }) => {
+const AddSubForm: React.FC<AddSubFormProps> = ({ onSuccess, onCancel, initialService, onShowInterstitial }) => {
   const { addSubscription } = useAppStore();
 
   const [step, setStep] = useState<Step>(initialService ? 'plan' : 'service');
@@ -44,8 +43,6 @@ const AddSubForm: React.FC<AddSubFormProps> = ({ onSuccess, onCancel, initialSer
   const [isCustom, setIsCustom] = useState(false);
   const [customName, setCustomName] = useState('');
   const [customPrice, setCustomPrice] = useState('');
-  const [showInterstitial, setShowInterstitial] = useState(false);
-
   const filteredServices = useMemo(() => searchServices(searchQuery), [searchQuery]);
 
   const handleSelectService = (service: PresetService) => {
@@ -59,15 +56,7 @@ const AddSubForm: React.FC<AddSubFormProps> = ({ onSuccess, onCancel, initialSer
     setStep('confirm');
   };
 
-  // "등록할게요" → 전면 광고 → 등록
-  const handleSubmitClick = () => {
-    if (isCustom && (!customName.trim() || !customPrice)) return;
-    setShowInterstitial(true);
-  };
-
-  const handleAdComplete = useCallback(() => {
-    setShowInterstitial(false);
-    // 광고 완료 후 실제 등록
+  const doRegister = () => {
     if (isCustom) {
       addSubscription({
         serviceName: customName.trim(),
@@ -88,8 +77,18 @@ const AddSubForm: React.FC<AddSubFormProps> = ({ onSuccess, onCancel, initialSer
         logoUrl: selectedService.logo,
       });
     }
-    onSuccess();
-  }, [isCustom, customName, customPrice, nextBillingDate, selectedService, selectedPlan, addSubscription, onSuccess]);
+  };
+
+  // "등록할게요" → 전면 광고 → 등록
+  const handleSubmitClick = () => {
+    if (isCustom && (!customName.trim() || !customPrice)) return;
+    if (onShowInterstitial) {
+      onShowInterstitial(doRegister);
+    } else {
+      doRegister();
+      onSuccess();
+    }
+  };
 
   // ── Step 1: Service Selection ──
   if (step === 'service') {
@@ -103,7 +102,6 @@ const AddSubForm: React.FC<AddSubFormProps> = ({ onSuccess, onCancel, initialSer
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full h-12 pl-12 pr-4 bg-toss-gray-50 rounded-toss text-base outline-none border-2 border-transparent focus:border-toss-blue/30 focus:bg-white transition-all placeholder:text-toss-gray-300"
-            autoFocus
           />
         </div>
 
@@ -252,7 +250,6 @@ const AddSubForm: React.FC<AddSubFormProps> = ({ onSuccess, onCancel, initialSer
               value={customName}
               onChange={(e) => setCustomName(e.target.value)}
               className="w-full h-14 px-4 bg-toss-gray-50 rounded-toss text-lg outline-none border-2 border-transparent focus:border-toss-blue/30 focus:bg-white transition-all placeholder:text-toss-gray-300"
-              autoFocus
             />
           </div>
           <div className="flex flex-col gap-2">
@@ -304,12 +301,6 @@ const AddSubForm: React.FC<AddSubFormProps> = ({ onSuccess, onCancel, initialSer
         </button>
       </div>
 
-      {/* 전면 광고 (인터스티셜) */}
-      <InterstitialAd
-        adId={AD_IDS.INTERSTITIAL_REGISTER}
-        isOpen={showInterstitial}
-        onComplete={handleAdComplete}
-      />
     </div>
   );
 };
