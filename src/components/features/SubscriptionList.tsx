@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useAppStore } from '../../store/useAppStore';
 import { calculateDDay, getEffectiveNextBillingDate, formatKoreanDate } from '../../utils/date';
 import { formatCurrency, convertToKRW, formatKoreanCurrency } from '../../utils/currency';
@@ -41,7 +41,9 @@ const SwipeableCard: React.FC<{
 }> = ({ sub, onEdit, onDelete, onClick }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const startX = useRef(0);
+  const startY = useRef(0);
   const currentX = useRef(0);
+  const isHorizontal = useRef<boolean | null>(null);
   const [offset, setOffset] = useState(0);
   const [swiping, setSwiping] = useState(false);
 
@@ -49,20 +51,45 @@ const SwipeableCard: React.FC<{
 
   const handleTouchStart = (e: React.TouchEvent) => {
     startX.current = e.touches[0].clientX;
+    startY.current = e.touches[0].clientY;
     currentX.current = startX.current;
+    isHorizontal.current = null;
     setSwiping(true);
   };
 
   const handleTouchMove = (e: React.TouchEvent) => {
     if (!swiping) return;
     currentX.current = e.touches[0].clientX;
-    const diff = currentX.current - startX.current;
-    const clamped = Math.max(-120, Math.min(120, diff));
+    const diffX = currentX.current - startX.current;
+    const diffY = e.touches[0].clientY - startY.current;
+
+    if (isHorizontal.current === null) {
+      isHorizontal.current = Math.abs(diffX) > Math.abs(diffY);
+    }
+
+    if (!isHorizontal.current) return;
+
+    const clamped = Math.max(-120, Math.min(120, diffX));
     setOffset(clamped);
   };
 
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+
+    const onNativeTouchMove = (e: TouchEvent) => {
+      if (isHorizontal.current === true) {
+        e.preventDefault();
+      }
+    };
+
+    el.addEventListener('touchmove', onNativeTouchMove, { passive: false });
+    return () => el.removeEventListener('touchmove', onNativeTouchMove);
+  }, []);
+
   const handleTouchEnd = () => {
     setSwiping(false);
+    isHorizontal.current = null;
     if (offset < -THRESHOLD) {
       setOffset(-120);
       setTimeout(() => {
