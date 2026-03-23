@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { useAppStore } from '../../store/useAppStore';
 import { calculateDDay, getEffectiveNextBillingDate, formatKoreanDate } from '../../utils/date';
-import { formatCurrency } from '../../utils/currency';
+import { formatCurrency, convertToKRW, formatKoreanCurrency } from '../../utils/currency';
 import { Trash2, Pencil } from 'lucide-react';
 import BottomSheet from '../common/BottomSheet';
 import EditSubForm from './EditSubForm';
@@ -76,6 +76,7 @@ const SwipeableCard: React.FC<{
     }
   };
 
+  const { exchangeRate } = useAppStore();
   const effectiveDate = getEffectiveNextBillingDate(sub.nextBillingDate, sub.billingCycle);
   const dday = calculateDDay(effectiveDate);
 
@@ -124,6 +125,11 @@ const SwipeableCard: React.FC<{
           <span className="text-lg font-bold text-toss-gray-900">
             {formatCurrency(sub.price, sub.currency)}
           </span>
+          {sub.currency === 'USD' && (
+            <span className="text-xs text-toss-gray-400">
+              {formatKoreanCurrency(Math.round(convertToKRW(sub.price, sub.currency, exchangeRate)))}
+            </span>
+          )}
           <span
             className={
               dday === 'D-Day'
