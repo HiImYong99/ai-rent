@@ -29,7 +29,7 @@ const EditSubForm: React.FC<EditSubFormProps> = ({ subscription, onSuccess, onCa
   };
 
   return (
-    <div className="flex flex-col gap-6 pb-4">
+    <div className="flex flex-col gap-6 pb-8 min-w-0 w-full">
       <div className="flex items-center gap-4 p-4 bg-toss-gray-50 rounded-toss">
         {subscription.logoUrl ? (
           <div className="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 p-1.5 bg-white border border-toss-gray-100">
@@ -108,12 +108,14 @@ const EditSubForm: React.FC<EditSubFormProps> = ({ subscription, onSuccess, onCa
 
       <div className="flex flex-col gap-2">
         <label className="text-sm font-bold text-toss-gray-600 pl-1">다음 결제일이 언제인가요?</label>
-        <input
-          type="date"
-          value={nextBillingDate}
-          onChange={(e) => setNextBillingDate(e.target.value)}
-          className="w-full h-14 px-4 bg-toss-gray-50 rounded-toss text-lg outline-none border-2 border-transparent focus:border-toss-blue/30 focus:bg-white transition-all"
-        />
+        <div className="overflow-hidden rounded-toss">
+          <input
+            type="date"
+            value={nextBillingDate}
+            onChange={(e) => setNextBillingDate(e.target.value)}
+            className="w-full h-14 px-4 bg-toss-gray-50 text-lg text-center outline-none border-2 border-transparent focus:border-toss-blue/30 focus:bg-white transition-all rounded-toss"
+          />
+        </div>
       </div>
 
       <div className="flex gap-3 pt-4">

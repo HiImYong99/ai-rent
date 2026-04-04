@@ -93,7 +93,7 @@ const AddSubForm: React.FC<AddSubFormProps> = ({ onSuccess, onCancel, initialSer
   // ── Step 1: Service Selection ──
   if (step === 'service') {
     return (
-      <div className="flex flex-col gap-5 pb-4">
+      <div className="flex flex-col gap-5 pb-4 min-w-0 w-full">
         <div className="relative">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-toss-gray-400" />
           <input
@@ -143,7 +143,7 @@ const AddSubForm: React.FC<AddSubFormProps> = ({ onSuccess, onCancel, initialSer
   // ── Step 2: Plan Selection ──
   if (step === 'plan' && selectedService) {
     return (
-      <div className="flex flex-col gap-5 pb-4">
+      <div className="flex flex-col gap-5 pb-4 min-w-0 w-full">
         <button
           type="button"
           onClick={() => {
@@ -208,7 +208,7 @@ const AddSubForm: React.FC<AddSubFormProps> = ({ onSuccess, onCancel, initialSer
 
   // ── Step 3: Confirm & Date ──
   return (
-    <div className="flex flex-col gap-6 pb-4">
+    <div className="flex flex-col gap-6 pb-4 min-w-0 w-full">
       <button
         type="button"
         onClick={() => {
@@ -267,12 +267,14 @@ const AddSubForm: React.FC<AddSubFormProps> = ({ onSuccess, onCancel, initialSer
 
       <div className="flex flex-col gap-2">
         <label className="text-sm font-bold text-toss-gray-600 pl-1">다음 결제일이 언제인가요?</label>
-        <input
-          type="date"
-          value={nextBillingDate}
-          onChange={(e) => setNextBillingDate(e.target.value)}
-          className="w-full h-14 px-4 bg-toss-gray-50 rounded-toss text-lg outline-none border-2 border-transparent focus:border-toss-blue/30 focus:bg-white transition-all"
-        />
+        <div className="overflow-hidden rounded-toss">
+          <input
+            type="date"
+            value={nextBillingDate}
+            onChange={(e) => setNextBillingDate(e.target.value)}
+            className="w-full h-14 px-4 bg-toss-gray-50 text-lg text-center outline-none border-2 border-transparent focus:border-toss-blue/30 focus:bg-white transition-all rounded-toss"
+          />
+        </div>
         <p className="text-xs text-toss-gray-400 pl-1">
           지난 날짜를 선택해도 다음 결제일로 자동 맞춰드려요
         </p>

@@ -66,17 +66,17 @@ function App() {
             </section>
           )}
 
-          {/* 3. Subscription List */}
-          <section>
-            <SubscriptionList onQuickAdd={handleQuickAdd} onAddNew={() => setIsAddSheetOpen(true)} />
-          </section>
-
-          {/* 4. 토스 배너 광고 - 스크롤 영역 하단 */}
+          {/* 3. 토스 배너 광고 - 구독 목록 위 */}
           {subscriptions.length > 0 && (
             <section>
               <TossBannerAd adId={AD_IDS.BANNER_LIST_BOTTOM} />
             </section>
           )}
+
+          {/* 4. Subscription List */}
+          <section>
+            <SubscriptionList onQuickAdd={handleQuickAdd} onAddNew={() => setIsAddSheetOpen(true)} />
+          </section>
         </div>
 
         {/* FAB - 우측 하단 고정 (max-width 컨테이너 내) */}

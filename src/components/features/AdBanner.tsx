@@ -1,5 +1,19 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { TossAds } from '@apps-in-toss/web-framework';
+
+let initialized = false;
+function ensureInitialized(): Promise<void> {
+  if (initialized) return Promise.resolve();
+  if (!TossAds.initialize.isSupported()) return Promise.reject();
+  return new Promise((resolve, reject) => {
+    TossAds.initialize({
+      callbacks: {
+        onInitialized: () => { initialized = true; resolve(); },
+        onInitializationFailed: reject,
+      },
+    });
+  });
+}
 
 interface TossBannerAdProps {
   adId: string;
@@ -8,14 +22,19 @@ interface TossBannerAdProps {
 
 const TossBannerAd: React.FC<TossBannerAdProps> = ({ adId, className = '' }) => {
   const ref = useRef<HTMLDivElement>(null);
+  const [ready, setReady] = useState(initialized);
 
   useEffect(() => {
-    if (!ref.current) return;
+    ensureInitialized().then(() => setReady(true)).catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    if (!ready || !ref.current) return;
     if (!TossAds.attachBanner.isSupported()) return;
 
     const result = TossAds.attachBanner(adId, ref.current);
     return () => result.destroy();
-  }, [adId]);
+  }, [adId, ready]);
 
   return <div ref={ref} className={`w-full ${className}`} />;
 };

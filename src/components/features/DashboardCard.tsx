@@ -3,7 +3,7 @@ import { useAppStore } from '../../store/useAppStore';
 import { convertToKRW, formatKoreanCurrency } from '../../utils/currency';
 
 const DashboardCard: React.FC = () => {
-  const { subscriptions, exchangeRate } = useAppStore();
+  const { subscriptions, exchangeRate, exchangeRateDate } = useAppStore();
 
   if (subscriptions.length === 0) return null;
 
@@ -73,11 +73,18 @@ const DashboardCard: React.FC = () => {
       )}
 
       {/* Exchange rate */}
-      <div className="mt-4 pt-4 border-t border-toss-gray-100 flex justify-between items-center text-xs text-toss-gray-400">
-        <span>{subscriptions.length}개 서비스 구독 중</span>
-        <span className="font-semibold text-toss-gray-500">
-          1 USD = {exchangeRate.toLocaleString()}원
-        </span>
+      <div className="mt-4 pt-4 border-t border-toss-gray-100 text-xs text-toss-gray-400">
+        <div className="flex justify-between items-center">
+          <span>{subscriptions.length}개 서비스 구독 중</span>
+          <span className="font-semibold text-toss-gray-500">
+            1 USD = {exchangeRate.toLocaleString()}원
+          </span>
+        </div>
+        {exchangeRateDate && (
+          <p className="text-right mt-1 text-[11px] text-toss-gray-300">
+            {new Date(exchangeRateDate).toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })} 기준
+          </p>
+        )}
       </div>
     </div>
   );

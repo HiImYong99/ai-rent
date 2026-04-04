@@ -14,9 +14,10 @@ export interface Subscription {
 
 export interface AppState {
   subscriptions: Subscription[];
-  exchangeRate: number; // USD to KRW 환율 (기본값: 1350)
+  exchangeRate: number; // USD to KRW 환율
+  exchangeRateDate: string; // 환율 기준 일시
   addSubscription: (sub: Omit<Subscription, 'id'>) => void;
   updateSubscription: (id: string, sub: Partial<Subscription>) => void;
   removeSubscription: (id: string) => void;
-  setExchangeRate: (rate: number) => void;
+  setExchangeRate: (rate: number, date: string) => void;
 }
