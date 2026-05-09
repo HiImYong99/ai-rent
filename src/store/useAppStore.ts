@@ -6,8 +6,8 @@ export const useAppStore = create<AppState>()(
   persist(
     (set) => ({
       subscriptions: [],
-      exchangeRate: 1510.33,
-      exchangeRateDate: '2026-04-03T14:34:00Z',
+      exchangeRate: 1461.80,
+      exchangeRateDate: '2026-05-09T00:02:31Z',
       addSubscription: (sub) =>
         set((state) => ({
           subscriptions: [
@@ -29,12 +29,12 @@ export const useAppStore = create<AppState>()(
     }),
     {
       name: 'ai-sub-storage',
-      version: 1,
+      version: 2,
       migrate: (persisted: unknown, version: number) => {
         const state = persisted as Record<string, unknown>;
-        if (version === 0) {
-          state.exchangeRate = 1510.33;
-          state.exchangeRateDate = '2026-04-03T14:34:00Z';
+        if (version < 2) {
+          state.exchangeRate = 1461.80;
+          state.exchangeRateDate = '2026-05-09T00:02:31Z';
         }
         return state as AppState;
       },
